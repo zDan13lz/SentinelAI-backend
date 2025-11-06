@@ -1,0 +1,70 @@
+# ----------------------------
+# Core Python
+# ----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+build/
+dist/
+.eggs/
+*.manifest
+*.spec
+
+# ----------------------------
+# Environments
+# ----------------------------
+.env
+.env.local
+.env.*.local
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.idea/
+.vscode/
+
+# ----------------------------
+# NodeJS (if any mixed JS scripts)
+# ----------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ----------------------------
+# OS / Editor Junk
+# ----------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.tmp
+*.log
+
+# ----------------------------
+# Deployment
+# ----------------------------
+*.pid
+*.seed
+*.cover
+*.coverage
+.cache/
+.mypy_cache/
+pytest_cache/
+.pytest_cache/
+.coverage
+.pyre/
+.pytype/
+
+# ----------------------------
+# Railway / Build Artifacts
+# ----------------------------
+railway.toml
+*.sqlite3
+__pypackages__/
