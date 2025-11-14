@@ -1,0 +1,106 @@
+{
+  "tier1_mega_caps": [
+    "SPY", "QQQ", "IWM", "DIA", "VIX",
+    "TSLA", "AAPL", "NVDA", "META", "GOOGL",
+    "AMZN", "MSFT", "AMD", "NFLX", "AVGO"
+  ],
+  
+  "tier2_large_caps": [
+    "ORCL", "CRM", "ADBE", "INTC", "CSCO",
+    "QCOM", "TXN", "AMAT", "MU", "LRCX",
+    "KLAC", "MRVL", "SNPS", "CDNS", "ADI",
+    "NXPI", "MCHP", "ON", "MPWR", "SWKS",
+    "JPM", "BAC", "WFC", "GS", "MS",
+    "C", "BLK", "SCHW", "AXP", "COF",
+    "V", "MA", "PYPL", "SQ", "COIN",
+    "DIS", "CMCSA", "T", "VZ", "TMUS",
+    "UNH", "JNJ", "PFE", "ABBV", "MRK",
+    "LLY", "TMO", "ABT", "DHR", "CVS"
+  ],
+  
+  "tier3_mid_caps": [
+    "BA", "CAT", "DE", "MMM", "HON",
+    "RTX", "LMT", "NOC", "GD", "LHX",
+    "XOM", "CVX", "COP", "SLB", "EOG",
+    "PXD", "OXY", "MPC", "VLO", "PSX",
+    "F", "GM", "TSLA", "RIVN", "LCID",
+    "NIO", "XPEV", "LI", "NKLA", "FSR",
+    "UBER", "LYFT", "DASH", "ABNB", "DKNG",
+    "AFRM", "HOOD", "SOFI", "UPST", "NU"
+  ],
+  
+  "tier4_retail_favorites": [
+    "AMC", "GME", "BBBY", "BB", "NOK",
+    "CLOV", "WISH", "SKLZ", "OPEN", "RKT",
+    "PLTR", "RBLX", "U", "DDOG", "NET",
+    "SNOW", "CRWD", "ZS", "OKTA", "MDB",
+    "WDAY", "NOW", "TEAM", "ZM", "DOCU",
+    "SHOP", "MELI", "SE", "BABA", "JD",
+    "PDD", "BIDU", "NIO", "XPEV", "LI"
+  ],
+  
+  "tier5_healthcare": [
+    "MRNA", "BNTX", "PFE", "JNJ", "MRK",
+    "ABBV", "GILD", "AMGN", "REGN", "VRTX",
+    "BMY", "LLY", "BIIB", "ALXN", "ILMN"
+  ],
+  
+  "tier6_semiconductors": [
+    "TSM", "ASML", "AVGO", "TXN", "QCOM",
+    "ADI", "MRVL", "ON", "MPWR", "SWKS",
+    "MU", "WDC", "STX", "NXPI", "MCHP"
+  ],
+  
+  "tier7_consumer": [
+    "WMT", "COST", "TGT", "HD", "LOW",
+    "NKE", "LULU", "SBUX", "MCD", "CMG",
+    "YUM", "QSR", "DPZ", "BKNG", "MAR"
+  ],
+  
+  "tier8_industrials": [
+    "UPS", "FDX", "DAL", "UAL", "AAL",
+    "LUV", "JBLU", "SAVE", "ULCC", "HA"
+  ],
+  
+  "tier9_crypto_related": [
+    "COIN", "MARA", "RIOT", "CLSK", "MSTR",
+    "HUT", "BITF", "ARBK", "BTBT", "SOS"
+  ],
+  
+  "tier10_energy": [
+    "XLE", "XOP", "USO", "UCO", "USL",
+    "BNO", "DBO", "OIL", "GUSH", "DRIP"
+  ],
+  
+  "tier11_etfs": [
+    "SPY", "QQQ", "IWM", "DIA", "VXX",
+    "UVXY", "SVXY", "SQQQ", "TQQQ", "SPXL",
+    "SPXS", "TNA", "TZA", "FAS", "FAZ",
+    "LABU", "LABD", "SOXL", "SOXS", "TECL"
+  ],
+  
+  "tier12_meme_stocks": [
+    "GME", "AMC", "BBBY", "BB", "NOK",
+    "KOSS", "EXPR", "NAKD", "SNDL", "TLRY",
+    "WKHS", "RIDE", "GOEV", "HYLN", "BLNK"
+  ],
+  
+  "tier13_spacs": [
+    "CCIV", "PSTH", "IPOF", "IPOD", "AJAX",
+    "ACTC", "GHVI", "SRNG", "CONX", "VACQ"
+  ],
+  
+  "tier14_china": [
+    "BABA", "JD", "PDD", "BIDU", "TME",
+    "NTES", "NIO", "XPEV", "LI", "BEKE",
+    "EDU", "TAL", "VIPS", "YY", "HUYA"
+  ],
+  
+  "tier15_emerging": [
+    "PLTR", "SNOW", "ABNB", "RBLX", "COIN",
+    "RIVN", "LCID", "GRAB", "DIDI", "NU",
+    "UPST", "AFRM", "HOOD", "SOFI", "DASH"
+  ],
+  
+  "all_tickers": []
+}
