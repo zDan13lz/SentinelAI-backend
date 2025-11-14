@@ -2,18 +2,16 @@ const { Pool } = require('pg');
 
 const pool = new Pool({
   connectionString: 'postgresql://postgres:XCdaMkfDTzBGKMvaSmmEWnbQBBjyDZYl@switchyard.proxy.rlwy.net:32085/railway',
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: { rejectUnauthorized: false }
 });
 
 async function createTable() {
   console.log('🔄 Connecting to Railway PostgreSQL...');
-  
+
   try {
     const testResult = await pool.query('SELECT NOW()');
     console.log('✅ Connected! Server time:', testResult.rows[0].now);
-    
+
     console.log('🔄 Creating options_trades table...');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS options_trades (
@@ -40,8 +38,14 @@ async function createTable() {
         priority INTEGER,
         urgency_score INTEGER,
         urgency_level VARCHAR(20),
-        urgency_label VARCHAR(20),
-        urgency_color VARCHAR(20),
+        urgency_label VARCHAR(50),
+        urgency_color VARCHAR(10),
+        paid_over_ask DECIMAL(5,2),
+        paid_below_bid DECIMAL(5,2),
+        spread_position INTEGER,
+        spot_nbbo_bid DECIMAL(10,4),
+        spot_nbbo_ask DECIMAL(10,4),
+        has_urgency BOOLEAN DEFAULT FALSE,
         is_aggressive BOOLEAN,
         sweep_exchange_count INTEGER,
         sweep_exchanges TEXT[],
@@ -56,8 +60,22 @@ async function createTable() {
         created_at TIMESTAMP DEFAULT NOW()
       );
     `);
-    console.log('✅ Table created!');
-    
+    console.log('✅ options_trades created!');
+
+    console.log('🔄 Adding missing columns to ensure compatibility...');
+    await pool.query(`
+      ALTER TABLE options_trades
+        ADD COLUMN IF NOT EXISTS urgency_label VARCHAR(50),
+        ADD COLUMN IF NOT EXISTS urgency_color VARCHAR(10),
+        ADD COLUMN IF NOT EXISTS paid_over_ask DECIMAL(5, 2),
+        ADD COLUMN IF NOT EXISTS paid_below_bid DECIMAL(5, 2),
+        ADD COLUMN IF NOT EXISTS spread_position INTEGER,
+        ADD COLUMN IF NOT EXISTS spot_nbbo_bid DECIMAL(10, 4),
+        ADD COLUMN IF NOT EXISTS spot_nbbo_ask DECIMAL(10, 4),
+        ADD COLUMN IF NOT EXISTS has_urgency BOOLEAN DEFAULT FALSE;
+    `);
+    console.log('✅ Missing columns added!');
+
     console.log('🔄 Creating indexes...');
     await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_trades_timestamp ON options_trades(timestamp DESC);
@@ -67,9 +85,11 @@ async function createTable() {
       CREATE INDEX IF NOT EXISTS idx_trades_trade_type ON options_trades(trade_type);
       CREATE INDEX IF NOT EXISTS idx_trades_ticker_date ON options_trades(ticker, date DESC);
       CREATE INDEX IF NOT EXISTS idx_trades_strike_exp ON options_trades(strike, expiration);
+      CREATE INDEX IF NOT EXISTS idx_urgency_level ON options_trades(urgency_level, timestamp DESC);
+      CREATE INDEX IF NOT EXISTS idx_has_urgency ON options_trades(has_urgency, timestamp DESC) WHERE has_urgency = TRUE;
     `);
     console.log('✅ Indexes created!');
-    
+
     console.log('🔄 Creating flow_stats table...');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS flow_stats (
@@ -93,33 +113,11 @@ async function createTable() {
       );
     `);
     console.log('✅ flow_stats table created!');
-    
-    console.log('🔄 Adding missing columns to existing table...');
-    await pool.query(`
-      ALTER TABLE options_trades 
-        ADD COLUMN IF NOT EXISTS exchange_id INTEGER,
-        ADD COLUMN IF NOT EXISTS urgency_level VARCHAR(20),
-        ADD COLUMN IF NOT EXISTS is_part_of_sweep BOOLEAN DEFAULT false,
-        ADD COLUMN IF NOT EXISTS sweep_id VARCHAR(100),
-        ADD COLUMN IF NOT EXISTS is_block BOOLEAN DEFAULT false,
-        ADD COLUMN IF NOT EXISTS block_reason TEXT;
-    `);
-    console.log('✅ Missing columns added!');
-    
-    const tables = await pool.query(`
-      SELECT table_name 
-      FROM information_schema.tables 
-      WHERE table_schema = 'public'
-    `);
-    console.log('📊 Tables in database:', tables.rows.map(r => r.table_name));
-    
-    // Count existing trades
-    const tradeCount = await pool.query('SELECT COUNT(*) FROM options_trades');
-    console.log(`📊 Existing trades: ${tradeCount.rows[0].count}`);
-    
-    console.log('\n🎉 SUCCESS! Railway database is ready for deployment!');
+
+    console.log('🎉 SUCCESS! Railway database is now fully upgraded!');
     await pool.end();
     process.exit(0);
+
   } catch (error) {
     console.error('❌ Error:', error.message);
     console.error('Full error:', error);
