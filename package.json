@@ -4,7 +4,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "rebuild": "echo force rebuild"
   },
   "dependencies": {
     "axios": "^1.13.2",
