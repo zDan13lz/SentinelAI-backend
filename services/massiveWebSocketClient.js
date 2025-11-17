@@ -167,18 +167,27 @@ class MassiveWebSocketClient {
         premium,
         isAggressive
       );
-
-      // ✅ FIXED TIMESTAMP (nanoseconds → milliseconds)
-      const tsMs = Math.floor(trade.t / 1000000);
-
-      // ✅ Validate timestamp
-      const today = new Date();
-      const isValidDate = tradeDate.getFullYear() >= 2020 && tradeDate.getFullYear() <= today.getFullYear() + 1;
+      let tsMs;
+      if (trade.t > 1e15) {
+        tsMs = Math.floor(trade.t / 1000000);
+      } else if (trade.t > 1e12) {
+        tsMs = Math.floor(trade.t / 1000);
+      } else {
+        tsMs = trade.t;
+      }
+    
+      const tradeDate = new Date(tsMs);
+      const now = new Date();
+      const isValid = tradeDate.getFullYear() >= 2020 &&
+                      tradeDate.getFullYear() <= now.getFullYear() + 1 &&
+                      tsMs > 0;
+      // Use current time if validation fails
+      const finalDate = isValid ? tradeDate : now;
 
       const tradeData = {
         timestamp: tsMs,
-        date: isValidDate ? tradeDate.toISOString().split('T')[0] : today.toISOString().split('T')[0],
-        time: isValidDate ? tradeDate.toTimeString().split(' ')[0] : today.toTimeString().split(' ')[0],
+        date: finalDate.toISOString().split('T')[0],
+        time: finalDate.toTimeString().split(' ')[0],
 
         ticker: parsed.ticker,
         strike: parsed.strike,
