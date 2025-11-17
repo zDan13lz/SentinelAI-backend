@@ -184,56 +184,60 @@ router.get('/stats', async (req, res) => {
 
     console.log(`📊 Fetching stats for ${today}`);
 
+    // ✅ Calculate stats directly from options_trades table
     const statsResult = await pool.query(
       `
-      SELECT *
-      FROM flow_stats
+      SELECT 
+        COUNT(*) as total_trades,
+        COALESCE(SUM(premium), 0) as total_premium,
+        COUNT(CASE WHEN contract_type = 'CALL' THEN 1 END) as call_trades,
+        COALESCE(SUM(CASE WHEN contract_type = 'CALL' THEN premium ELSE 0 END), 0) as call_premium,
+        COUNT(CASE WHEN contract_type = 'PUT' THEN 1 END) as put_trades,
+        COALESCE(SUM(CASE WHEN contract_type = 'PUT' THEN premium ELSE 0 END), 0) as put_premium,
+        COUNT(CASE WHEN trade_type = 'SWEEP' THEN 1 END) as sweep_trades,
+        COALESCE(SUM(CASE WHEN trade_type = 'SWEEP' THEN premium ELSE 0 END), 0) as sweep_premium,
+        COUNT(CASE WHEN trade_type = 'BLOCK' THEN 1 END) as block_trades,
+        COALESCE(SUM(CASE WHEN trade_type = 'BLOCK' THEN premium ELSE 0 END), 0) as block_premium
+      FROM options_trades
       WHERE date = $1
       `,
       [today]
     );
 
-    if (statsResult.rows.length === 0) {
-      return res.json({
-        success: true,
-        date: today,
-        stats: {
-          total_trades: 0,
-          total_premium: 0,
-          call_trades: 0,
-          call_premium: 0,
-          put_trades: 0,
-          put_premium: 0,
-          sweep_trades: 0,
-          sweep_premium: 0,
-          block_trades: 0,
-          block_premium: 0,
-          call_put_ratio: 0,
-          institutional_ratio: 0
-        }
-      });
-    }
-
     const stats = statsResult.rows[0];
 
-    stats.call_put_ratio =
-      stats.put_premium > 0
-        ? (stats.call_premium / stats.put_premium).toFixed(2)
-        : 0;
+    // Calculate ratios
+    const callPutRatio =
+      parseFloat(stats.put_premium) > 0
+        ? (parseFloat(stats.call_premium) / parseFloat(stats.put_premium)).toFixed(2)
+        : '0';
 
-    stats.institutional_ratio =
-      stats.total_premium > 0
+    const institutionalRatio =
+      parseFloat(stats.total_premium) > 0
         ? (
-            ((stats.sweep_premium + stats.block_premium) /
-              stats.total_premium) *
+            ((parseFloat(stats.sweep_premium) + parseFloat(stats.block_premium)) /
+              parseFloat(stats.total_premium)) *
             100
           ).toFixed(1)
-        : 0;
+        : '0';
 
     res.json({
       success: true,
       date: today,
-      stats
+      stats: {
+        total_trades: parseInt(stats.total_trades),
+        total_premium: parseFloat(stats.total_premium),
+        call_trades: parseInt(stats.call_trades),
+        call_premium: parseFloat(stats.call_premium),
+        put_trades: parseInt(stats.put_trades),
+        put_premium: parseFloat(stats.put_premium),
+        sweep_trades: parseInt(stats.sweep_trades),
+        sweep_premium: parseFloat(stats.sweep_premium),
+        block_trades: parseInt(stats.block_trades),
+        block_premium: parseFloat(stats.block_premium),
+        call_put_ratio: callPutRatio,
+        institutional_ratio: institutionalRatio
+      }
     });
   } catch (error) {
     console.error('❌ Error fetching stats:', error);
@@ -341,81 +345,6 @@ router.get('/health', (req, res) => {
       success: false,
       status: 'error',
       error: error.message
-    });
-  }
-});
-
-/**
- * GET /api/flow/stats/db/:ticker
- * Get aggregate stats from database for a ticker (works when market closed)
- */
-router.get('/stats/db/:ticker', async (req, res) => {
-  try {
-    const { ticker } = req.params;
-    const today = new Date().toISOString().split('T')[0];
-
-    console.log(`📊 Fetching database stats for ${ticker.toUpperCase()}`);
-
-    const statsQuery = `
-      SELECT 
-        COUNT(*) as total_trades,
-        COALESCE(SUM(premium), 0) as total_premium,
-        COALESCE(SUM(CASE WHEN contract_type = 'CALL' THEN premium ELSE 0 END), 0) as call_premium,
-        COALESCE(SUM(CASE WHEN contract_type = 'PUT' THEN premium ELSE 0 END), 0) as put_premium,
-        COUNT(CASE WHEN contract_type = 'CALL' THEN 1 END) as call_trades,
-        COUNT(CASE WHEN contract_type = 'PUT' THEN 1 END) as put_trades,
-        COUNT(CASE WHEN trade_type = 'SWEEP' THEN 1 END) as sweeps,
-        COUNT(CASE WHEN trade_type = 'BLOCK' THEN 1 END) as blocks
-      FROM options_trades
-      WHERE ticker = $1
-        AND date = $2
-    `;
-
-    const result = await pool.query(statsQuery, [
-      ticker.toUpperCase(),
-      today
-    ]);
-    const stats = result.rows[0];
-
-    const callPutRatio =
-      stats.put_premium > 0
-        ? (stats.call_premium / stats.put_premium).toFixed(2)
-        : 'N/A';
-
-    res.json({
-      success: true,
-      ticker: ticker.toUpperCase(),
-      date: today,
-      stats: {
-        totalPremium: parseFloat(stats.total_premium),
-        totalTrades: parseInt(stats.total_trades),
-        calls: {
-          premium: parseFloat(stats.call_premium),
-          trades: parseInt(stats.call_trades),
-          percentage:
-            stats.total_premium > 0
-              ? ((stats.call_premium / stats.total_premium) * 100).toFixed(1)
-              : '0'
-        },
-        puts: {
-          premium: parseFloat(stats.put_premium),
-          trades: parseInt(stats.put_trades),
-          percentage:
-            stats.total_premium > 0
-              ? ((stats.put_premium / stats.total_premium) * 100).toFixed(1)
-              : '0'
-        },
-        callPutRatio,
-        sweeps: parseInt(stats.sweeps),
-        blocks: parseInt(stats.blocks)
-      },
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    console.error('❌ Error fetching database flow stats:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch flow statistics'
     });
   }
 });
